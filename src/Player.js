@@ -28,6 +28,7 @@ class Player extends React.Component {
 
   componentDidMount() {
     this.checkIfLoaded()
+
     // Skip to required timestamp if set
     // Autoplay isn't supported in Chromium: https://goo.gl/xX8pDD
     const queryParams = new URLSearchParams(window.location.search)
@@ -98,7 +99,6 @@ class Player extends React.Component {
       const copiedLink = urlWithoutQuery + '?kid=' + kloeke + '&num=' + clipNumber + '&ts=' + currentTime
       copyToClipboard(copiedLink)
     };
-    // const rootElement = document.getElementById('webvtt-player')
     return (
       <div className="webvtt-player">
         <div className="media">
