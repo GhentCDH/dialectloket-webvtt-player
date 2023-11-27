@@ -17,6 +17,8 @@ class Player extends React.Component {
     this.metatrack = React.createRef()
     this.audio = React.createRef()
 
+    this.prefix = 'webvtt-player-'
+
     this.onLoaded = this.onLoaded.bind(this)
     this.seek = this.seek.bind(this)
     this.checkIfLoaded = this.checkIfLoaded.bind(this)
@@ -28,11 +30,25 @@ class Player extends React.Component {
     // Skip to required timestamp if set
     // Autoplay isn't supported in Chromium: https://goo.gl/xX8pDD
     const queryParams = new URLSearchParams(window.location.search)
-    const timestamp = queryParams.get('ts')
-    const tsNumber = Number(timestamp)
-    if (!isNaN(tsNumber) && tsNumber > 0) {
-      this.audio.current.currentTime = tsNumber
+
+    // Jump to specific clip if set
+    const clipNumber = Number(queryParams.get('num'))
+    if (!isNaN(clipNumber) && clipNumber > 0) {
+
+      const showElement = document.getElementById(this.prefix + clipNumber)
+      if (showElement) {
+        showElement.scrollIntoView()
+
+        // Get the appropriate timestamp if set
+        // TODO: Only jump to timestamp if this player is the clip to be played
+        const tsNumber = Number(queryParams.get('ts'))
+        if (!isNaN(tsNumber) && tsNumber > 0) {
+          this.audio.current.currentTime = tsNumber
+        }
+
+      }
     }
+
   }
 
   render () {
@@ -64,10 +80,22 @@ class Player extends React.Component {
       const player = event.target.closest('.player')
       const audioPlayer = player.querySelector('audio')
       const currentTime = audioPlayer.currentTime
-      const kloeke = event.currentTarget.parentNode.parentNode.parentNode.parentElement.dataset.kloeke
-      const copiedLink = url + '?kid=' + kloeke + '&ts=' + currentTime
+
+      // Get the number and kloeke code  of the current clip
+      const parentContainer = event.currentTarget.parentNode.parentNode.parentNode.parentElement
+      const prefix = 'webvtt-player-'
+      if (!parentContainer.id.startsWith(prefix)) return false
+      const clipNumber = parentContainer.id.substring(prefix.length)
+      const kloeke = parentContainer.dataset.kloeke
+
+      // Build the link
+      const urlObject = new URL(url);
+      const urlWithoutQuery = urlObject.origin + urlObject.pathname;
+      const copiedLink = urlWithoutQuery + '?kid=' + kloeke + '&num=' + clipNumber + '&ts=' + currentTime
       copyToClipboard(copiedLink)
     };
+    // const rootElement = document.getElementById('webvtt-player')
+    console.log('foo: ' + this.props)
     return (
       <div className="webvtt-player">
         <div className="media">
