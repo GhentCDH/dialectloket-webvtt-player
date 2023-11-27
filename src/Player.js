@@ -16,6 +16,7 @@ class Player extends React.Component {
     this.track = React.createRef()
     this.metatrack = React.createRef()
     this.audio = React.createRef()
+    this.instancenum = React.createRef()
 
     this.prefix = 'webvtt-player-'
 
@@ -35,15 +36,18 @@ class Player extends React.Component {
     const clipNumber = Number(queryParams.get('num'))
     if (!isNaN(clipNumber) && clipNumber > 0) {
 
-      const showElement = document.getElementById(this.prefix + clipNumber)
-      if (showElement) {
-        showElement.scrollIntoView()
+      if (clipNumber === Number(this.props.instancenum)) {
 
-        // Get the appropriate timestamp if set
-        // TODO: Only jump to timestamp if this player is the clip to be played
-        const tsNumber = Number(queryParams.get('ts'))
-        if (!isNaN(tsNumber) && tsNumber > 0) {
-          this.audio.current.currentTime = tsNumber
+        const showElement = document.getElementById(this.prefix + clipNumber).parentNode.parentElement
+        if (showElement) {
+          showElement.scrollIntoView()
+
+          // Get the appropriate timestamp if set
+          const tsNumber = Number(queryParams.get('ts'))
+          if (!isNaN(tsNumber) && tsNumber > 0) {
+            this.audio.current.currentTime = tsNumber
+          }
+
         }
 
       }
@@ -95,7 +99,6 @@ class Player extends React.Component {
       copyToClipboard(copiedLink)
     };
     // const rootElement = document.getElementById('webvtt-player')
-    console.log('foo: ' + this.props)
     return (
       <div className="webvtt-player">
         <div className="media">
@@ -117,7 +120,7 @@ class Player extends React.Component {
                 src={this.props.metadata}
                 ref={this.metatrack} />
             </audio>
-            <div className="icon-copy-link" onClick={copyLink} data-kloeke={this.kloeke}></div>
+            <div className="icon-copy-link" onClick={copyLink} data-kloeke={this.kloeke} data-instancenum={this.props.instancenum}></div>
           </div>
           <div className="tracks">
             <Transcript 
@@ -164,7 +167,8 @@ Player.propTypes = {
   transcript: PropTypes.string,
   metadata: PropTypes.string,
   preload: PropTypes.bool,
-  query: PropTypes.string
+  query: PropTypes.string,
+  instancenum: PropTypes.string
 }
 
 export default Player

@@ -14,16 +14,8 @@ elements.forEach(element => {
             audio={element.dataset.audio}
             transcript={element.dataset.transcript}
             metadata={element.dataset.metadata}
+            instancenum={element.dataset.instancenum}
             preload={true} />,
         element
     )
 });
-
-// ReactDOM.render(
-//   <Player
-//     audio={root.dataset.audio}
-//     transcript={root.dataset.transcript}
-//     metadata={root.dataset.metadata}
-//     preload={true} />,
-//   root
-// )
