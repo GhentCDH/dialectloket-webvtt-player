@@ -14,6 +14,7 @@ elements.forEach(element => {
             audio={element.dataset.audio}
             transcript={element.dataset.transcript}
             metadata={element.dataset.metadata}
+            kloeke={element.dataset.kloeke}
             instancenum={element.dataset.instancenum}
             preload={true} />,
         element

@@ -16,6 +16,7 @@ class Player extends React.Component {
     this.track = React.createRef()
     this.metatrack = React.createRef()
     this.audio = React.createRef()
+    this.kloeke = React.createRef()
     this.instancenum = React.createRef()
 
     this.prefix = 'webvtt-player-'
@@ -33,24 +34,33 @@ class Player extends React.Component {
     // Autoplay isn't supported in Chromium: https://goo.gl/xX8pDD
     const queryParams = new URLSearchParams(window.location.search)
 
-    // Jump to specific clip if set
-    const clipNumber = Number(queryParams.get('num'))
-    if (!isNaN(clipNumber) && clipNumber > 0) {
+    // Is there a kloeke code in the query parameters?
+    const kid = String(queryParams.get('kid'))
+    if (kid) {
 
-      if (clipNumber === Number(this.props.instancenum)) {
+      // Is this the same kloeke code as the current recording?
+      if (kid === this.props.kloeke) {
 
-        const showElement = document.getElementById(this.prefix + clipNumber).parentNode.parentElement
-        if (showElement) {
-          showElement.scrollIntoView()
+        // Jump to specific clip if set
+        const clipNumber = Number(queryParams.get('num'))
+        if (!isNaN(clipNumber) && clipNumber > 0) {
 
-          // Get the appropriate timestamp if set
-          const tsNumber = Number(queryParams.get('ts'))
-          if (!isNaN(tsNumber) && tsNumber > 0) {
-            this.audio.current.currentTime = tsNumber
+          if (clipNumber === Number(this.props.instancenum)) {
+
+            const showElement = document.getElementById(this.prefix + clipNumber).parentNode.parentElement
+            if (showElement) {
+              showElement.scrollIntoView()
+
+              // Get the appropriate timestamp if set
+              const tsNumber = Number(queryParams.get('ts'))
+              if (!isNaN(tsNumber) && tsNumber > 0) {
+                this.audio.current.currentTime = tsNumber
+              }
+
+            }
+
           }
-
         }
-
       }
     }
 
@@ -168,6 +178,7 @@ Player.propTypes = {
   metadata: PropTypes.string,
   preload: PropTypes.bool,
   query: PropTypes.string,
+  kloeke: PropTypes.string,
   instancenum: PropTypes.string
 }
 
