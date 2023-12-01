@@ -9,6 +9,7 @@
 .webvtt-player .line {
   padding: 5px;
   cursor: pointer;
+  animation: fadeIn 1.5s;
 }
 
 .webvtt-player .time {
@@ -20,4 +21,9 @@
 
 .webvtt-player .text {
   margin-left: 110px;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }

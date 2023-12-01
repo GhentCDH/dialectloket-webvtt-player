@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Transcript from './Transcript'
 import Metadata from './Metadata'
-// import Search from './Search'
 import './Player.css'
 
 class Player extends React.Component {
@@ -17,6 +16,10 @@ class Player extends React.Component {
     this.track = React.createRef()
     this.metatrack = React.createRef()
     this.audio = React.createRef()
+    this.kloeke = React.createRef()
+    this.instancenum = React.createRef()
+
+    this.prefix = 'webvtt-player-'
 
     this.onLoaded = this.onLoaded.bind(this)
     this.seek = this.seek.bind(this)
@@ -26,6 +29,41 @@ class Player extends React.Component {
 
   componentDidMount() {
     this.checkIfLoaded()
+
+    // Skip to required timestamp if set
+    // Autoplay isn't supported in Chromium: https://goo.gl/xX8pDD
+    const queryParams = new URLSearchParams(window.location.search)
+
+    // Is there a kloeke code in the query parameters?
+    const kid = String(queryParams.get('kid'))
+    if (kid) {
+
+      // Is this the same kloeke code as the current recording?
+      if (kid === this.props.kloeke) {
+
+        // Jump to specific clip if set
+        const clipNumber = Number(queryParams.get('num'))
+        if (!isNaN(clipNumber) && clipNumber > 0) {
+
+          if (clipNumber === Number(this.props.instancenum)) {
+
+            const showElement = document.getElementById(this.prefix + clipNumber).parentNode.parentElement
+            if (showElement) {
+              showElement.scrollIntoView()
+
+              // Get the appropriate timestamp if set
+              const tsNumber = Number(queryParams.get('ts'))
+              if (!isNaN(tsNumber) && tsNumber > 0) {
+                this.audio.current.currentTime = tsNumber
+              }
+
+            }
+
+          }
+        }
+      }
+    }
+
   }
 
   render () {
@@ -42,6 +80,35 @@ class Player extends React.Component {
         seek={this.seek}
         track={metatrack} />
       : ""
+    const copyToClipboard = (stringToCopy) => {
+      navigator.clipboard.writeText(stringToCopy)
+          .then(() => {
+            return true
+          })
+          .catch(err => {
+            console.error('Failed to copy text: ', err)
+          })
+    }
+    // Copy a link to current timestamp to clipboard
+    const copyLink = (event) => {
+      const url = window.location.href
+      const player = event.target.closest('.player')
+      const audioPlayer = player.querySelector('audio')
+      const currentTime = audioPlayer.currentTime
+
+      // Get the number and kloeke code  of the current clip
+      const parentContainer = event.currentTarget.parentNode.parentNode.parentNode.parentElement
+      const prefix = 'webvtt-player-'
+      if (!parentContainer.id.startsWith(prefix)) return false
+      const clipNumber = parentContainer.id.substring(prefix.length)
+      const kloeke = parentContainer.dataset.kloeke
+
+      // Build the link
+      const urlObject = new URL(url);
+      const urlWithoutQuery = urlObject.origin + urlObject.pathname;
+      const copiedLink = urlWithoutQuery + '?kid=' + kloeke + '&num=' + clipNumber + '&ts=' + currentTime
+      copyToClipboard(copiedLink)
+    };
     return (
       <div className="webvtt-player">
         <div className="media">
@@ -63,6 +130,7 @@ class Player extends React.Component {
                 src={this.props.metadata}
                 ref={this.metatrack} />
             </audio>
+            <div className="icon-copy-link" onClick={copyLink} data-kloeke={this.kloeke} data-instancenum={this.props.instancenum}></div>
           </div>
           <div className="tracks">
             <Transcript 
@@ -109,7 +177,9 @@ Player.propTypes = {
   transcript: PropTypes.string,
   metadata: PropTypes.string,
   preload: PropTypes.bool,
-  query: PropTypes.string
+  query: PropTypes.string,
+  kloeke: PropTypes.string,
+  instancenum: PropTypes.string
 }
 
 export default Player

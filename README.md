@@ -10,10 +10,20 @@ Humanities].
 
 ---
 
-Modified by [GhentCDH] for the [Dialectloket] project.
+Modified by [GhentCDH] for the [Dialectloket] project. 
+
+---
+
+Build `webvtt-player.js` for inclusion in existing project: 
 
 ```bash
-$ npm install webvtt-player
+npm run build-public
+```
+
+---
+
+```bash
+npm install webvtt-player
 ```
 
 ```javascript
